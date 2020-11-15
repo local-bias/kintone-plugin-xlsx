@@ -1,0 +1,83 @@
+.local-bias_excel_button-wrapper {
+	display: inline-block;
+	width: 48px;
+	height: 48px;
+	min-width: 48px;
+	padding: 0;
+	margin-right: 8px;
+	box-sizing: border-box;
+	border: 1px solid #e3e7e8;
+	background-color: #f7f9fa;
+}
+
+.local-bias_excel_button-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	transition: all .4s ease;
+}
+
+.local-bias_excel_button-wrapper svg {
+	width: 30px;
+	height: 30px;
+	fill: #a8a8a8;
+}
+.local-bias_excel_button-wrapper:hover svg {
+	fill: #3495da;
+}
+
+.local-bias_excel_button-wrapper .local-bias_spinner {
+	display: none
+}
+.local-bias_excel_button-wrapper svg {
+	display: block
+}
+
+.local-bias_excel_button-wrapper[disabled] .local-bias_spinner {
+	display: block;
+}
+.local-bias_excel_button-wrapper[disabled] svg {
+	display: none;
+}
+
+.local-bias_spinner {
+  width: 30px;
+  height: 30px;
+
+  position: relative;
+  margin: 0 auto;
+}
+
+.local-bias_double-bounce1, .local-bias_double-bounce2 {
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background-color: #66a;
+	opacity: 0.6;
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	-webkit-animation: local-bias_sk-bounce 2.0s infinite ease-in-out;
+	animation: local-bias_sk-bounce 2.0s infinite ease-in-out;
+}
+
+.local-bias_double-bounce2 {
+	-webkit-animation-delay: -1.0s;
+	animation-delay: -1.0s;
+}
+
+@-webkit-keyframes local-bias_sk-bounce {
+	0%, 100% { -webkit-transform: scale(0.0) }
+	50% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes local-bias_sk-bounce {
+  0%, 100% {
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 50% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+  }
+}

@@ -1,0 +1,9 @@
+#lb-configWrapper {
+
+}
+
+#lb-configWrapper .footer-buttons {
+	display: flex;
+	justify-content: space-around;
+	width: 400px;
+}
