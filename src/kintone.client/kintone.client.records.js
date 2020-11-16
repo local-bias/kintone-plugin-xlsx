@@ -9,6 +9,8 @@ const LIMIT_POST = 100;
 const LIMIT_PUT = 100;
 const LIMIT_DELETE = 100;
 
+const client = {};
+
 /**
  * 対象アプリの、指定条件のレコードを全て取得します
  * API使用回数を、(対象レコード数 / 500) + 1回消費します
@@ -17,27 +19,42 @@ const LIMIT_DELETE = 100;
  *   - {string} app アプリID (省略時は表示中アプリ)
  *   - {String} query 検索クエリ (省略時は全レコード)
  *   - {Array} fields 取得フィールド (省略時は全フィールド)
+ *   - {Boolean} totalCount レコード総数を取得するか(省略時は取得しない)
  * @return {Object} Promiseオブジェクト
  *   - {Array} records 取得レコードの配列
  */
-exports.get = async obj => {
+client.get = async (obj = {}) => {
 
-	// api送信用のパラメータを設定します
-	const param = {
-		'app': obj.app || kintone.app.getId() || kintone.mobile.app.getId(),
-		'query': obj.query ? formatQuery(obj.query) : '',
-		'fields': obj.fields || [],
-		'size': LIMIT_GET
-	};
-	if (typeof obj.totalCount !== 'undefined') {
-		param.totalCount = true;
-	}
+  // カーソル取得時のパラメータを設定します
+  const param = {
+    'app': obj.app || kintone.app.getId() || kintone.mobile.app.getId(),
+    'fields': obj.fields || [],
+    'size': LIMIT_GET,
+    'totalCount': Boolean(obj.totalCount)
+  };
 
-	const cursor = await kintone.api(kintone.api.url(`${END_POINT}/cursor`, true), 'POST', param);
+  // レコードの件数や参照位置が設定されている場合は、カーソルを使用しません
+  if (obj.query && (obj.query.indexOf('limit') !== -1 || obj.query.indexOf('offset') !== -1)) {
+    param.query = obj.query;
 
-  obj.onGetTotal ? obj.onGetTotal(cursor.totalCount) : '';
+    return kintone.api(kintone.api.url(END_POINT, true), 'GET', param);
+  }
 
-	return getRecordsByCursorId(cursor.id);
+  param.query = obj.query ? formatQuery(obj.query) : '';
+
+  // 全レコードのカーソルを取得します
+  const cursor = await kintone.api(kintone.api.url(`${END_POINT}/cursor`, true), 'POST', param);
+
+  // カーソル取得をトリガーとする関数が設定されている場合は実行します
+  if (obj.onGetTotal) {
+    obj.onGetTotal(cursor.totalCount)
+  }
+
+  // 全レコードを返却します
+  return getRecordsByCursorId({
+    'id': cursor.id,
+    'onAdvance': obj.onAdvance,
+  });
 };
 
 /**
@@ -59,16 +76,25 @@ function formatQuery(query) {
  * @param {Object} loadedData 前回呼び出し時までに取得されたレコード
  * @return {Promise} 取得した全レコード
  */
-async function getRecordsByCursorId(id, loadedData) {
+async function getRecordsByCursorId(obj) {
 
-	// 初期値を設定します
-	const data = loadedData || {};
-	data.records = data.records || [];
+  // 初期値を設定します
+  if (!obj.loadedData) {
+    obj.loadedData = {'records': []};
+  }
 
-	const response = await kintone.api(kintone.api.url(`${END_POINT}/cursor`, true), 'GET', {id: id});
+  // 次のカーソルまでのレコードを取得します
+  const response = await kintone.api(kintone.api.url(`${END_POINT}/cursor`, true), 'GET', {id: obj.id});
 
-	data.records = data.records.concat(response.records);
-	return response.next ? getRecordsByCursorId(id, data) : data;
+  // 既に取得済みのレコードに、今回取得したレコードを加えます
+  obj.loadedData.records = obj.loadedData.records.concat(response.records);
+
+  // レコード取得をトリガーとする関数が設定されている場合は実行します
+  if (obj.onAdvance) {
+    obj.onAdvance(obj.loadedData.records.length);
+  }
+
+  return response.next ? getRecordsByCursorId(obj) : obj.loadedData;
 }
 
 /**
@@ -81,25 +107,25 @@ async function getRecordsByCursorId(id, loadedData) {
  * @param {String} _app アプリID (省略時はこの関数が実行されたアプリ)
  * @return {Promise} API実行結果の配列
  */
-exports.post = async obj => {
+client.post = async (obj = {}) => {
 
-	let records = obj.records.slice();
-	const count = records.length;
-	const app = obj.app || kintone.app.getId() || kintone.mobile.app.getId();
+  let records = obj.records.slice();
+  const count = records.length;
+  const app = obj.app || kintone.app.getId() || kintone.mobile.app.getId();
 
-	const responses = [];
+  const responses = [];
 
-	while (records.length) {
-		responses.push(await kintone.api(kintone.api.url(END_POINT, true), 'POST', {
-			'app': app,
-			'records': records.slice(0, LIMIT_POST)
-		}));
-		records.splice(0, LIMIT_POST);
-	}
+  while (records.length) {
+    responses.push(await kintone.api(kintone.api.url(END_POINT, true), 'POST', {
+      'app': app,
+      'records': records.slice(0, LIMIT_POST)
+    }));
+    records.splice(0, LIMIT_POST);
+  }
 
-	responses.total = count;
+  responses.total = count;
 
-	return responses;
+  return responses;
 }
 
 /**
@@ -114,26 +140,24 @@ exports.post = async obj => {
  * @param {String} _app アプリID (省略時はこの関数が実行されたアプリ)
  * @return {Object} Promiseオブジェクト
  */
-exports.put = async obj => {
+client.put = async (obj = {}) => {
 
-  // ディープコピー
-	let records = obj.records.slice();
+  let records = obj.records.slice();
+  const count = records.length;
+  const app = obj.app || kintone.app.getId() || kintone.mobile.app.getId();
+  const responses = [];
 
-	const count = records.length;
-	const app = obj.app || kintone.app.getId() || kintone.mobile.app.getId();
-	const responses = [];
+  while (records.length) {
+    responses.push(await kintone.api(kintone.api.url(END_POINT, true), 'PUT', {
+      'app': app,
+      'records': records.slice(0, LIMIT_PUT)
+    }));
+    records.splice(0, LIMIT_PUT);
+  }
 
-	while (records.length) {
-		responses.push(await kintone.api(kintone.api.url(END_POINT, true), 'PUT', {
-			'app': app,
-			'records': records.slice(0, LIMIT_PUT)
-		}));
-		records.splice(0, LIMIT_PUT);
-	}
+  responses.total = count;
 
-	responses.total = count;
-
-	return responses;
+  return responses;
 }
 
 /**
@@ -148,23 +172,21 @@ exports.put = async obj => {
  * @param {String} _app アプリID (省略時はこの関数が実行されたアプリ)
  * @return {Promise} 削除したレコード数
  */
-exports.delete = async obj => {
+client.delete = async (obj = {}) => {
 
-  // ディープコピー
-	let ids = obj.ids.slice();
+  let ids = obj.ids.slice();
+  const count = ids.length;
+  const app = obj.app || kintone.app.getId() || kintone.mobile.app.getId();
 
-	const count = ids.length;
-	const app = obj.app || kintone.app.getId() || kintone.mobile.app.getId();
+  while (ids.length) {
+    await kintone.api(kintone.api.url(END_POINT, true), 'DELETE', {
+      'app': app,
+      'ids': ids.slice(0, LIMIT_DELETE)
+    });
+    ids.splice(0, LIMIT_DELETE);
+  }
 
-	while (ids.length) {
-		await kintone.api(kintone.api.url(END_POINT, true), 'DELETE', {
-			'app': app,
-			'ids': ids.slice(0, LIMIT_DELETE)
-		});
-		ids.splice(0, LIMIT_DELETE);
-	}
-
-	return count;
+  return count;
 }
 
 /**
@@ -174,19 +196,21 @@ exports.delete = async obj => {
  * @param {String} _app アプリID(省略時はこの関数が実行されたアプリ)
  * @return {Object} Promiseオブジェクト(fullfilledでレコード数)
  */
-exports.deleteByQuery = async obj => {
+client.deleteByQuery = async (obj = {}) => {
 
-	const app = obj.app || kintone.app.getId() || kintone.mobile.app.getId();
+  const app = obj.app || kintone.app.getId() || kintone.mobile.app.getId();
 
-	const body = {
-		'app': app,
-		'query': obj.query,
-		'fields': ['$id']
-	}
+  const body = {
+    'app': app,
+    'query': obj.query,
+    'fields': ['$id']
+  }
 
-	const response = await exports.get(body);
+  const response = await client.get(body);
 
-	const ids = response.records.map(record => record.$id.value);
+  const ids = response.records.map(record => record.$id.value);
 
-	return exports.delete(ids, app);
+  return client.delete({'ids': ids, 'app': app});
 }
+
+export default client;
