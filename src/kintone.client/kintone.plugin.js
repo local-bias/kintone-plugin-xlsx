@@ -1,10 +1,12 @@
 
+const plugin = {};
+
 /**
  * プラグインに保持しているパラメータを返却します.
  *
  * @return {Object} プラグインに保持しているパラメータ
  */
-exports.getConfig = obj => {
+plugin.getConfig = obj => {
 
   const config = kintone.plugin.app.getConfig(obj.id);
 
@@ -22,7 +24,7 @@ exports.getConfig = obj => {
  *
  * @param {Object} params プラグインに保持させるパラメータ
  */
-exports.setConfig = obj => {
+plugin.setConfig = obj => {
 
   // 引数のプロパティをJSON形式に変換し、格納し直します
   const config = Object.keys(obj.config).reduce((accu, key) => {
@@ -35,3 +37,5 @@ exports.setConfig = obj => {
 
   kintone.plugin.app.setConfig(config);
 }
+
+export default plugin;

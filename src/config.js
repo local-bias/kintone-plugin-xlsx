@@ -1,5 +1,5 @@
 
-import {plugin} from './kintone.client';
+import plugin from './kintone.client/kintone.plugin.js';
 
 (PLUGIN_ID => {
   'use strict';
