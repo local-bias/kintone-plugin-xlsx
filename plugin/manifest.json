@@ -12,6 +12,10 @@
 		"en": "This plugin enable to export displayed infomations to XLSX format."
 	},
 	"icon": "image/icon.png",
+	"homepage_url": {
+	    "ja": "https://localbias.work/",
+	    "en": "https://localbias.work/"
+	 },
 	"desktop": {
 		"js": ["js/desktop.js"],
 
