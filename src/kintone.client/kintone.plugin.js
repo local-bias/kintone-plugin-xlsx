@@ -6,9 +6,9 @@ const plugin = {};
  *
  * @return {Object} プラグインに保持しているパラメータ
  */
-plugin.getConfig = obj => {
+plugin.getConfig = props => {
 
-  const config = kintone.plugin.app.getConfig(obj.id);
+  const config = kintone.plugin.app.getConfig(props.id);
 
   return Object.keys(config).reduce((accu, key) => {
 
@@ -24,12 +24,12 @@ plugin.getConfig = obj => {
  *
  * @param {Object} params プラグインに保持させるパラメータ
  */
-plugin.setConfig = obj => {
+plugin.setConfig = props => {
 
   // 引数のプロパティをJSON形式に変換し、格納し直します
-  const config = Object.keys(obj.config).reduce((accu, key) => {
+  const config = Object.keys(props.config).reduce((accu, key) => {
 
-    accu[key] = JSON.stringify(obj.config[key]);
+    accu[key] = JSON.stringify(props.config[key]);
 
     return accu;
 
