@@ -15,13 +15,13 @@ const client = {};
  * 対象アプリの、指定条件のレコードを全て取得します
  * API使用回数を、(対象レコード数 / 500) + 1回消費します
  *
- * @param {Object} obj
+ * @param {Object} props -
  *   - {string} app アプリID (省略時は表示中アプリ)
- *   - {String} query 検索クエリ (省略時は全レコード)
- *   - {Array} fields 取得フィールド (省略時は全フィールド)
+ *   - {string} query 検索クエリ (省略時は全レコード)
+ *   - {Array<string>} fields 取得フィールド (省略時は全フィールド)
  *   - {Boolean} totalCount レコード総数を取得するか(省略時は取得しない)
- * @return {Object} Promiseオブジェクト
- *   - {Array} records 取得レコードの配列
+ * @return {Promise<any>} Promiseオブジェクト
+ *   - {Array<any>} records 取得レコードの配列
  */
 client.get = async (props = {}) => {
 
@@ -60,8 +60,8 @@ client.get = async (props = {}) => {
 /**
  * 全件表示用に検索クエリを修正します
  *
- * @param {String} query 元のクエリ
- * @return {String} 修正後のクエリ
+ * @param {string} query 元のクエリ
+ * @return {string} 修正後のクエリ
  */
 function formatQuery(query) {
   return query.replace(/limit.*/g, '').replace(/offset.*/g, '');
@@ -76,7 +76,7 @@ function formatQuery(query) {
  * @param {Object} loadedData 前回呼び出し時までに取得されたレコード
  * @return {Promise} 取得した全レコード
  */
-async function getRecordsByCursorId(obj) {
+async function getRecordsByCursorId(props) {
 
   // 初期値を設定します
   if (!props.loadedData) {
@@ -94,7 +94,7 @@ async function getRecordsByCursorId(obj) {
     props.onAdvance(props.loadedData.records.length);
   }
 
-  return response.next ? getRecordsByCursorId(obj) : props.loadedData;
+  return response.next ? getRecordsByCursorId(props) : props.loadedData;
 }
 
 /**
