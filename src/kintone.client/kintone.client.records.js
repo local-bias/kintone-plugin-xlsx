@@ -15,7 +15,7 @@ const client = {};
  * 対象アプリの、指定条件のレコードを全て取得します
  * API使用回数を、(対象レコード数 / 500) + 1回消費します
  *
- * @param {Object} props -
+ * @param {any} props -
  *   - {string} app アプリID (省略時は表示中アプリ)
  *   - {string} query 検索クエリ (省略時は全レコード)
  *   - {Array<string>} fields 取得フィールド (省略時は全フィールド)
@@ -72,8 +72,9 @@ function formatQuery(query) {
  * 一度の検索で取得しきれない場合は、再帰的に関数が呼ばれ
  * レコードを蓄積させていきます
  *
- * @param {String} id カーソルID
- * @param {Object} loadedData 前回呼び出し時までに取得されたレコード
+ * @param {any} props -
+ * - {String} id カーソルID
+ * - {any} loadedData 前回呼び出し時までに取得されたレコード
  * @return {Promise} 取得した全レコード
  */
 async function getRecordsByCursorId(props) {
@@ -103,8 +104,9 @@ async function getRecordsByCursorId(props) {
  * 全てのAPIを並列で実行するとエラーが発生する場合があるため、
  * １つずつ完了を確認してから次を実行します
  *
- * @param {Array} _records 処理対象レコード
- * @param {String} _app アプリID (省略時はこの関数が実行されたアプリ)
+ * @param {any} props -
+ * - {Array<any>} records 処理対象レコード
+ * - {string} app アプリID (省略時はこの関数が実行されたアプリ)
  * @return {Promise} API実行結果の配列
  */
 client.post = async (props = {}) => {
@@ -134,11 +136,10 @@ client.post = async (props = {}) => {
  * 全てのAPIを並列で実行するとエラーが発生する場合があるため、
  * １つずつ完了を確認してから次を実行します
  *
- * @param {Array} _records 処理対象レコード
- *   - {String} id レコードID
- *   - {Object} record kintoneレコード
- * @param {String} _app アプリID (省略時はこの関数が実行されたアプリ)
- * @return {Object} Promiseオブジェクト
+ * @param {any} props -
+ *   - {string} app アプリID (省略時はこの関数が実行されたアプリ)
+ *   - {Array<any>} records kintoneレコード
+ * @return {Promise<any>} Promiseオブジェクト
  */
 client.put = async (props = {}) => {
 
@@ -168,9 +169,10 @@ client.put = async (props = {}) => {
  * Kintone REST APIのdeleteは、完了後空配列しか返さないため、
  * 代わりに削除したレコード数を返します
  *
- * @param {Array} _ids 処理対象レコードIDの配列
- * @param {String} _app アプリID (省略時はこの関数が実行されたアプリ)
- * @return {Promise} 削除したレコード数
+ * @param {any} props -
+ * - {Array<number>} ids 処理対象レコードIDの配列
+ * - {string} app アプリID (省略時はこの関数が実行されたアプリ)
+ * @return {Promise<number>} 削除したレコード数
  */
 client.delete = async (props = {}) => {
 
@@ -194,7 +196,7 @@ client.delete = async (props = {}) => {
  *
  * @param {String} query 検索クエリ
  * @param {String} _app アプリID(省略時はこの関数が実行されたアプリ)
- * @return {Object} Promiseオブジェクト(fullfilledでレコード数)
+ * @return {Promise<any>} Promiseオブジェクト(fullfilledでレコード数)
  */
 client.deleteByQuery = async props => {
 
