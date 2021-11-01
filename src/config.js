@@ -1,7 +1,6 @@
-
 import plugin from './kintone.client/kintone.plugin.js';
 
-(PLUGIN_ID => {
+((PLUGIN_ID) => {
   'use strict';
 
   const allRecords = document.getElementById('allRecords');
@@ -13,15 +12,14 @@ import plugin from './kintone.client/kintone.plugin.js';
   const submitButton = document.getElementById('lb-submitButton');
 
   if (submitButton) {
-    submitButton.addEventListener('click', clicked => {
-
-      const config = plugin.getConfig({'id': PLUGIN_ID});
+    submitButton.addEventListener('click', (clicked) => {
+      const config = plugin.getConfig({ id: PLUGIN_ID });
 
       config.allRecords = allRecords.checked;
       config.allFields = allFields.checked;
       config.union = union.checked;
 
-      plugin.setConfig({'config': config});
+      plugin.setConfig({ config: config });
     });
   }
 
@@ -32,7 +30,7 @@ import plugin from './kintone.client/kintone.plugin.js';
   }
 
   function onload() {
-    const config = plugin.getConfig({'id': PLUGIN_ID});
+    const config = plugin.getConfig({ id: PLUGIN_ID });
 
     if (typeof config.allRecords !== 'undefined') {
       allRecords.checked = config.allRecords;

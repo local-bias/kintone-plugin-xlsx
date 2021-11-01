@@ -1,7 +1,7 @@
 import client from './kintone.client';
 import xlsx from 'xlsx';
 
-(PLUGIN_ID => {
+((PLUGIN_ID) => {
   'use strict';
 
   const CLASS_BUTTON = 'local-bias_excel_button-wrapper';
@@ -10,8 +10,7 @@ import xlsx from 'xlsx';
 
   const app = kintone.app || kintone.mobile.app;
 
-  kintone.events.on(['app.record.index.show', 'mobile.app.record.index.show'], event => {
-
+  kintone.events.on(['app.record.index.show', 'mobile.app.record.index.show'], (event) => {
     // 既に設置済みの場合は処理しません
     if (document.querySelector(`.${CLASS_BUTTON}`)) {
       return event;
@@ -31,22 +30,19 @@ import xlsx from 'xlsx';
     `;
 
     // クリック時のイベントを作成します
-    button.addEventListener('click', async clicked => {
-
+    button.addEventListener('click', async (clicked) => {
       // 連続実行を防ぐため、ボタンを無効にします
-      button.setAttribute("disabled", true);
+      button.setAttribute('disabled', true);
 
       try {
         // Excelファイルをダウンロードします
         await downloadAsXlsx(event);
-
-      } catch(error) {
+      } catch (error) {
         event.error(prefix + '出力時にエラーが発生しました');
         console.error(error);
-
       } finally {
         // ボタンを有効にします
-        button.removeAttribute("disabled");
+        button.removeAttribute('disabled');
       }
     });
 
@@ -66,13 +62,12 @@ import xlsx from 'xlsx';
    * @param {Object} event kintoneイベント情報
    */
   async function downloadAsXlsx(event) {
-
-    const config = client.plugin.getConfig({'id': PLUGIN_ID});
+    const config = client.plugin.getConfig({ id: PLUGIN_ID });
 
     let targetRecords = event.records;
     if (config.allRecords) {
       const allRecordsResponse = await client.records.get({
-        'query': app.getQuery()
+        query: app.getQuery(),
       });
 
       targetRecords = allRecordsResponse.records;
@@ -85,15 +80,15 @@ import xlsx from 'xlsx';
 
     // 最終的にExcelシートとして登録するオブジェクトを定義します
     const sheet = {
-      '!merges': []
+      '!merges': [],
     };
 
     // 情報を補完するため、アプリ情報・フィールド情報をそれぞれ取得します
-    const appRequest = kintone.api(kintone.api.url('/k/v1/app', true), 'GET', {'id': app.getId()});
+    const appRequest = kintone.api(kintone.api.url('/k/v1/app', true), 'GET', { id: app.getId() });
 
     const fieldResponse = await getFields(event.viewId, Boolean(config.allFields));
 
-    const {fields, hasSubtable} = fieldResponse;
+    const { fields, hasSubtable } = fieldResponse;
 
     // Excelファイルを作成します
     let row = 0;
@@ -115,34 +110,33 @@ import xlsx from 'xlsx';
         });
 
         sheet['!merges'].push({
-          's': {'r': row, 'c': col},
-          'e': {'r': row, 'c': col + Object.keys(field.fields).length - 1},
+          s: { r: row, c: col },
+          e: { r: row, c: col + Object.keys(field.fields).length - 1 },
         });
 
         col += Object.keys(field.fields).length;
       } else {
-
         // セルの結合条件を設定します
         if (hasSubtable) {
           sheet['!merges'].push({
-            's': {'r': row, 'c': col},
-            'e': {'r': row + 1, 'c': col},
+            s: { r: row, c: col },
+            e: { r: row + 1, c: col },
           });
         }
         col++;
       }
     }
 
-    row = hasSubtable ? 2: 1;
+    row = hasSubtable ? 2 : 1;
     const maxCol = col;
 
     // 内容部分を作成します
-    targetRecords.map(record => {
+    targetRecords.map((record) => {
       col = 0;
 
       // レコードが使用する行数を算出します
       let rowCount = 1;
-      tableFields.map(tf => {
+      tableFields.map((tf) => {
         const len = record[tf.code].value.length;
         if (rowCount < len) {
           rowCount = len;
@@ -163,13 +157,15 @@ import xlsx from 'xlsx';
           });
 
           col += Object.keys(field.fields).length;
-
         } else {
-
           // 設定する値を取得します
           let value = '';
           if (record[field.code]) {
-            if (field.type === 'CREATOR' || field.type === 'MODIFIER' || field.type === 'STATUS_ASSIGNEE') {
+            if (
+              field.type === 'CREATOR' ||
+              field.type === 'MODIFIER' ||
+              field.type === 'STATUS_ASSIGNEE'
+            ) {
               value = record[field.code].value.name;
             } else {
               value = record[field.code].value;
@@ -181,8 +177,8 @@ import xlsx from 'xlsx';
 
           if (hasSubtable && config.union) {
             sheet['!merges'].push({
-              's': {'r': row, 'c': col},
-              'e': {'r': row + rowCount - 1, 'c': col},
+              s: { r: row, c: col },
+              e: { r: row + rowCount - 1, c: col },
             });
           }
           col++;
@@ -191,9 +187,9 @@ import xlsx from 'xlsx';
       row += rowCount;
     });
 
-    sheet['!ref'] = xlsx.utils.encode_range({s: {c: 0 ,r: 0}, e: {c: maxCol, r: row}})
+    sheet['!ref'] = xlsx.utils.encode_range({ s: { c: 0, r: 0 }, e: { c: maxCol, r: row } });
 
-    const workbook = {SheetNames: [], Sheets: {}};
+    const workbook = { SheetNames: [], Sheets: {} };
     workbook.SheetNames.push('app');
     workbook.Sheets['app'] = sheet;
 
@@ -209,17 +205,17 @@ import xlsx from 'xlsx';
    * @param {Object} sample フィールドを取得するためのサンプルレコード
    */
   async function getFields(viewId, displaysAll) {
-
     let viewFields;
 
     // レコードを全て表示しない場合は現在の一覧情報を取得し、表示しているフィールドを取得します
     if (!displaysAll) {
-      const viewResponse = await kintone.api(kintone.api.url('/k/v1/app/views', true), 'GET', {'app': app.getId()});
+      const viewResponse = await kintone.api(kintone.api.url('/k/v1/app/views', true), 'GET', {
+        app: app.getId(),
+      });
 
       const viewNames = Object.keys(viewResponse.views);
 
       for (let i = 0; i < viewNames.length; i++) {
-
         const view = viewResponse.views[viewNames[i]];
 
         if (view.id == viewId) {
@@ -234,7 +230,9 @@ import xlsx from 'xlsx';
       displaysAll = true;
     }
 
-    const fieldsResponse = kintone.api(kintone.api.url('/k/v1/app/form/fields', true), 'GET', {'app': app.getId()});
+    const fieldsResponse = kintone.api(kintone.api.url('/k/v1/app/form/fields', true), 'GET', {
+      app: app.getId(),
+    });
 
     const properties = (await fieldsResponse).properties;
 
@@ -244,9 +242,7 @@ import xlsx from 'xlsx';
 
     // 設定から、出力する項目情報を取得します
     const fields = Object.keys(properties).reduce((accu, code) => {
-
-      if (displaysAll || viewFields && viewFields.includes(code)) {
-
+      if (displaysAll || (viewFields && viewFields.includes(code))) {
         accu.push(properties[code]);
 
         if (!hasSubtable) {
@@ -257,8 +253,8 @@ import xlsx from 'xlsx';
     }, []);
 
     return {
-      'fields': fields,
-      'hasSubtable': hasSubtable,
+      fields: fields,
+      hasSubtable: hasSubtable,
     };
   }
 
@@ -290,10 +286,8 @@ import xlsx from 'xlsx';
    *
    */
   function setCell(sheet, row, col, value) {
+    const coordinate = xlsx.utils.encode_cell({ r: row, c: col });
 
-    const coordinate = xlsx.utils.encode_cell({'r': row, 'c': col});
-
-    sheet[coordinate] = {'t': 's', 'v': value};
+    sheet[coordinate] = { t: 's', v: value };
   }
-
 })(kintone.$PLUGIN_ID);
