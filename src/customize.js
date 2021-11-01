@@ -1,5 +1,6 @@
 import client from './kintone.client';
 import xlsx from 'xlsx';
+import { pushPluginName } from './common/local-storage';
 
 ((PLUGIN_ID) => {
   'use strict';
@@ -15,6 +16,10 @@ import xlsx from 'xlsx';
     if (document.querySelector(`.${CLASS_BUTTON}`)) {
       return event;
     }
+
+    try {
+      pushPluginName();
+    } catch (error) {}
 
     // XLSXダウンロードボタンを設定します
     const button = document.createElement('button');
