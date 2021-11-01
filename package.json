@@ -2,11 +2,19 @@
   "name": "kintone-plugin-webpack-example",
   "version": "0.1.0",
   "scripts": {
-    "develop": "webpack --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js",
-    "watch": "webpack --config webpack.dev.js -w",
-    "upload": "kintone-plugin-uploader dist/plugin.zip --watch --waiting-dialog-ms 3000",
-    "update-modules": "ncu -u"
+    "create-ppk": "kintone-plugin-packer --out dist/plugin-dev.zip plugin",
+    "move-ppk": "node scripts/move-ppk.ts",
+    "init": "run-s develop create-ppk move-ppk",
+    "bundle:dev": "webpack --config webpack.dev.js",
+    "bundle:prod": "webpack --config webpack.prod.js",
+    "bundle:watch": "webpack --config webpack.dev.js -w",
+    "merge-manifest:dev": "ts-node scripts/marge-json.ts dev",
+    "merge-manifest:prod": "ts-node scripts/marge-json.ts prod",
+    "develop": "run-s merge-manifest:dev bundle:dev",
+    "build": "run-s  merge-manifest:prod bundle:prod",
+    "watch": "run-s merge-manifest:dev bundle:watch",
+    "upload": "kintone-plugin-uploader dist/plugin-dev.zip --watch --waiting-dialog-ms 3000",
+    "start": "run-p watch upload"
   },
   "devDependencies": {
     "@kintone/plugin-packer": "5.0.22",
@@ -14,6 +22,7 @@
     "@kintone/webpack-plugin-kintone-plugin": "5.0.22",
     "npm-run-all": "4.1.5",
     "terser-webpack-plugin": "5.2.4",
+    "ts-node": "^10.4.0",
     "webpack": "5.59.1",
     "webpack-cli": "4.9.1",
     "webpack-merge": "5.8.0",
