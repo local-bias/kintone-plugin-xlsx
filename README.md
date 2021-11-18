@@ -1,4 +1,3 @@
-# Excel 出力プラグイン
 
 <h1 align="center">
   <p align="center">Excel 出力プラグイン</p>
