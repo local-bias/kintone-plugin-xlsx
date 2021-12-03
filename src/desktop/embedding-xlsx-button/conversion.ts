@@ -48,10 +48,8 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
     client.app.getFormFields({ app: appId }),
   ]);
 
-  // 最終的にExcelシートとして登録するオブジェクトを定義します
-  const sheet: Sheet = {
-    '!merges': [],
-  };
+  const merges: xlsx.Range[] = [];
+  const sheet = xlsx.utils.aoa_to_sheet([[]]);
 
   // 情報を補完するため、アプリ情報・フィールド情報をそれぞれ取得します
   const fields = await getFields(
@@ -80,7 +78,7 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
         setCell(sheet, row + 1, col + j, field.fields[key].label);
       });
 
-      sheet['!merges'].push({
+      merges.push({
         s: { r: row, c: col },
         e: { r: row, c: col + Object.keys(field.fields).length - 1 },
       });
@@ -89,7 +87,7 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
     } else {
       // セルの結合条件を設定します
       if (includesSubtable) {
-        sheet['!merges'].push({
+        merges.push({
           s: { r: row, c: col },
           e: { r: row + 1, c: col },
         });
@@ -119,6 +117,9 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
     // フィールドの各値を設定します
     for (const field of fields) {
       const targetField = record[field.code];
+      if (!targetField) {
+        continue;
+      }
 
       if (targetField.type === 'SUBTABLE') {
         const subValue = targetField as any as SubTable;
@@ -139,7 +140,7 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
         setCell(sheet, row, col, value);
 
         if (includesSubtable && config.union) {
-          sheet['!merges'].push({
+          merges.push({
             s: { r: row, c: col },
             e: { r: row + rowCount - 1, c: col },
           });
@@ -152,10 +153,10 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
   }
 
   sheet['!ref'] = xlsx.utils.encode_range({ s: { c: 0, r: 0 }, e: { c: maxCol, r: row } });
+  sheet['!merges'] = merges;
 
-  const workbook: WorkBook = { SheetNames: [], Sheets: {} };
-  workbook.SheetNames.push('app');
-  workbook.Sheets['app'] = sheet;
+  const workbook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(workbook, sheet, 'app');
 
   const date = new Date();
   const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
