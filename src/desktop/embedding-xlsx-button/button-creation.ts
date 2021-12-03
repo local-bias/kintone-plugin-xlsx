@@ -85,7 +85,7 @@ const getCSS = () => css`
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        background-color: #66a;
+        background-color: #3498dbaa;
         opacity: 0.6;
         position: absolute;
         top: 0;

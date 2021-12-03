@@ -1,10 +1,23 @@
-//@ts-nocheck
-
-import xlsx from 'xlsx';
+import xlsx, { Sheet, WorkBook } from 'xlsx';
 import { getAllRecords } from '@common/kintone-rest-api';
-import { getQuery, getQueryCondition } from '@common/kintone';
+import { getAppId, getQuery, getQueryCondition } from '@common/kintone';
+import { KintoneRestAPIClient } from '@kintone/rest-api-client';
+import { Properties, ViewForResponse } from '@kintone/rest-api-client/lib/client/types';
+import {
+  OneOf as FieldProperty,
+  Subtable as SubtableProperty,
+  InSubtable as InSubtableProperty,
+} from '@kintone/rest-api-client/lib/KintoneFields/types/property';
+import {
+  InSubtable as InSubtableField,
+  OneOf as KintoneField,
+  Subtable as SubtableField,
+} from '@kintone/rest-api-client/lib/KintoneFields/types/field';
 
-const app = kintone.app || kintone.mobile.app;
+type ViewList = Record<string, ViewForResponse>;
+
+type SubTable = SubtableField<Record<string, InSubtableField>>;
+type SubTableProperty = SubtableProperty<Record<string, InSubtableProperty>>;
 
 /**
  * 受け取ったkintoneレコードを変換し、XLSX形式でダウンロードします
@@ -12,41 +25,56 @@ const app = kintone.app || kintone.mobile.app;
  * @param {Object} event kintoneイベント情報
  */
 export async function download(event: kintone.Event, config: kintone.plugin.Storage) {
+  const appId = getAppId();
+
+  if (!appId) {
+    return;
+  }
+
   const query = (config.allRecords ? getQueryCondition() : getQuery()) || '';
 
-  const targetRecords = await getAllRecords({ query });
+  const targetRecords = await getAllRecords({ app: appId, query });
 
   // レコードが存在しない場合は処理しません
   if (!targetRecords.length) {
-    return false;
+    return;
   }
 
+  const client = new KintoneRestAPIClient();
+
+  const [app, { views }, { properties }] = await Promise.all([
+    client.app.getApp({ id: appId }),
+    client.app.getViews({ app: appId }),
+    client.app.getFormFields({ app: appId }),
+  ]);
+
   // 最終的にExcelシートとして登録するオブジェクトを定義します
-  const sheet = {
+  const sheet: Sheet = {
     '!merges': [],
   };
 
   // 情報を補完するため、アプリ情報・フィールド情報をそれぞれ取得します
-  const appRequest = kintone.api(kintone.api.url('/k/v1/app', true), 'GET', { id: app.getId() });
+  const fields = await getFields(
+    views,
+    properties,
+    String(event.viewId),
+    Boolean(config.allFields)
+  );
 
-  const fieldResponse = await getFields(event.viewId, Boolean(config.allFields));
-
-  const { fields, hasSubtable } = fieldResponse;
+  const includesSubtable = fields.some((field) => field.type === 'SUBTABLE');
 
   // Excelファイルを作成します
   let row = 0;
   let col = 0;
-  const tableFields = [];
+  const tableFields: SubTableProperty[] = [];
 
-  for (let i = 0; i < fields.length; i++) {
-    const field = fields[i];
-
+  for (const field of fields) {
     // セルの値を設定します
     setCell(sheet, row, col, field.label);
 
     // サブテーブルの場合
     if (field.type === 'SUBTABLE') {
-      tableFields.push(field);
+      tableFields.push(field as SubTableProperty);
 
       Object.keys(field.fields).map((key, j) => {
         setCell(sheet, row + 1, col + j, field.fields[key].label);
@@ -60,7 +88,7 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
       col += Object.keys(field.fields).length;
     } else {
       // セルの結合条件を設定します
-      if (hasSubtable) {
+      if (includesSubtable) {
         sheet['!merges'].push({
           s: { r: row, c: col },
           e: { r: row + 1, c: col },
@@ -70,55 +98,47 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
     }
   }
 
-  row = hasSubtable ? 2 : 1;
+  row = includesSubtable ? 2 : 1;
   const maxCol = col;
 
   // 内容部分を作成します
-  targetRecords.map((record) => {
+  for (const record of targetRecords) {
     col = 0;
 
     // レコードが使用する行数を算出します
     let rowCount = 1;
     tableFields.map((tf) => {
-      const len = record[tf.code].value.length;
+      const subtable = record[tf.code] as SubTable;
+
+      const len = subtable.value.length;
       if (rowCount < len) {
         rowCount = len;
       }
     });
 
     // フィールドの各値を設定します
-    for (let i = 0; i < fields.length; i++) {
-      const field = fields[i];
+    for (const field of fields) {
+      const targetField = record[field.code];
 
-      if (field.type === 'SUBTABLE') {
-        const subValue = record[field.code].value;
+      if (targetField.type === 'SUBTABLE') {
+        const subValue = targetField as any as SubTable;
 
-        record[field.code].value.map((tableRow, j) => {
-          Object.keys(field.fields).map((key, k) => {
-            setCell(sheet, row + j, col + k, tableRow.value[key].value);
+        subValue.value.map((tableRow, j) => {
+          Object.keys((field as any).fields).map((key, k) => {
+            const value = getFieldValue(tableRow.value[key]);
+
+            setCell(sheet, row + j, col + k, value);
           });
         });
 
-        col += Object.keys(field.fields).length;
+        col += Object.keys((field as any).fields).length;
       } else {
-        // 設定する値を取得します
-        let value = '';
-        if (record[field.code]) {
-          if (
-            field.type === 'CREATOR' ||
-            field.type === 'MODIFIER' ||
-            field.type === 'STATUS_ASSIGNEE'
-          ) {
-            value = record[field.code].value.name;
-          } else {
-            value = record[field.code].value;
-          }
-        }
+        const value = getFieldValue(targetField);
 
         // セルの値を設定します
         setCell(sheet, row, col, value);
 
-        if (hasSubtable && config.union) {
+        if (includesSubtable && config.union) {
           sheet['!merges'].push({
             s: { r: row, c: col },
             e: { r: row + rowCount - 1, c: col },
@@ -127,19 +147,20 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
         col++;
       }
     }
+
     row += rowCount;
-  });
+  }
 
   sheet['!ref'] = xlsx.utils.encode_range({ s: { c: 0, r: 0 }, e: { c: maxCol, r: row } });
 
-  const workbook = { SheetNames: [], Sheets: {} };
+  const workbook: WorkBook = { SheetNames: [], Sheets: {} };
   workbook.SheetNames.push('app');
   workbook.Sheets['app'] = sheet;
 
-  const appInfo = await appRequest;
   const date = new Date();
+  const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
-  xlsx.writeFile(workbook, `${appInfo.name}.xlsx`);
+  xlsx.writeFile(workbook, `${app.name}_${dateString}.xlsx`);
 }
 
 /**
@@ -147,59 +168,25 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
  *
  * @param {Object} sample フィールドを取得するためのサンプルレコード
  */
-async function getFields(viewId, displaysAll) {
-  let viewFields;
+const getFields = async (
+  views: ViewList,
+  properties: Properties,
+  viewId: string,
+  displaysAll: boolean
+) => {
+  if (displaysAll) {
+    return Object.values(properties);
+  }
 
   // レコードを全て表示しない場合は現在の一覧情報を取得し、表示しているフィールドを取得します
-  if (!displaysAll) {
-    const viewResponse = await kintone.api(kintone.api.url('/k/v1/app/views', true), 'GET', {
-      app: app.getId(),
-    });
+  const found = Object.values(views).find((view) => viewId === view.id);
 
-    const viewNames = Object.keys(viewResponse.views);
-
-    for (let i = 0; i < viewNames.length; i++) {
-      const view = viewResponse.views[viewNames[i]];
-
-      if (view.id == viewId) {
-        viewFields = view.fields;
-        break;
-      }
-    }
+  if (!found || found.type !== 'LIST') {
+    return Object.values(properties);
   }
 
-  // 取得した一覧のどのIDにも当てはまらない場合は、恐らく全てを表示している場合
-  if (!displaysAll && !viewFields) {
-    displaysAll = true;
-  }
-
-  const fieldsResponse = kintone.api(kintone.api.url('/k/v1/app/form/fields', true), 'GET', {
-    app: app.getId(),
-  });
-
-  const properties = (await fieldsResponse).properties;
-
-  // レコード一覧にサブテーブルが存在する場合は、ヘッダーを2行に設定します
-  // サブテーブルの有無を保持します
-  let hasSubtable = false;
-
-  // 設定から、出力する項目情報を取得します
-  const fields = Object.keys(properties).reduce((accu, code) => {
-    if (displaysAll || (viewFields && viewFields.includes(code))) {
-      accu.push(properties[code]);
-
-      if (!hasSubtable) {
-        hasSubtable = properties[code].type === 'SUBTABLE';
-      }
-    }
-    return accu;
-  }, []);
-
-  return {
-    fields: fields,
-    hasSubtable: hasSubtable,
-  };
-}
+  return Object.values(properties).filter((property) => found.fields.includes(property.code));
+};
 
 /**
  * Excelシートオブジェクトの特定のセルに、値をセットします
@@ -210,8 +197,36 @@ async function getFields(viewId, displaysAll) {
  * @param {String} value 設定する値
  *
  */
-function setCell(sheet, row, col, value) {
+function setCell(sheet: Sheet, row: number, col: number, value: string) {
   const coordinate = xlsx.utils.encode_cell({ r: row, c: col });
 
   sheet[coordinate] = { t: 's', v: value };
 }
+
+const getFieldValue = (field: KintoneField) => {
+  switch (field.type) {
+    case 'CREATOR':
+    case 'MODIFIER':
+      return `${field.value.name}(${field.value.code})`;
+
+    case 'CHECK_BOX':
+    case 'MULTI_SELECT':
+    case 'CATEGORY':
+      return field.value.join('\n');
+
+    case 'USER_SELECT':
+    case 'ORGANIZATION_SELECT':
+    case 'GROUP_SELECT':
+    case 'STATUS_ASSIGNEE':
+      return field.value.map((value) => value.name).join('\n');
+
+    case 'FILE':
+      return field.value.map((value) => value.name).join('\n');
+
+    case 'SUBTABLE':
+      return '';
+
+    default:
+      return field.value || '';
+  }
+};
