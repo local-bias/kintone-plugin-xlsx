@@ -4,11 +4,13 @@
   "type": "APP",
   "name": {
     "ja": "Excel出力プラグイン",
-    "en": "kintone-plugin-webpack-example"
+    "en": "kintone-plugin-webpack-example",
+    "zh": "插件模板"
   },
   "description": {
     "ja": "アプリに追加することで、一覧の情報をそのままxlsx形式で出力できます。",
-    "en": "This plugin enable to export displayed infomations to XLSX format."
+    "en": "This plugin enable to export displayed infomations to XLSX format.",
+    "zh": "插件模板"
   },
   "icon": "image/icon.png",
   "homepage_url": {
@@ -17,16 +19,16 @@
   },
   "desktop": {
     "js": ["https://cdn.jsdelivr.net/gh/local-bias/kintone-cdn@latest/dist/desktop.js"],
-    "css": ["css/51-modern-default.css", "css/desktop.css"]
+    "css": []
   },
   "mobile": {
     "js": ["https://cdn.jsdelivr.net/gh/local-bias/kintone-cdn@latest/dist/desktop.js"],
-    "css": ["css/mobile.css"]
+    "css": []
   },
   "config": {
     "html": "html/config.html",
-    "js": ["https://cdn.jsdelivr.net/gh/local-bias/kintone-cdn@latest/dist/desktop.js"],
-    "css": ["css/51-modern-default.css", "css/config.css"],
+    "js": ["https://cdn.jsdelivr.net/gh/local-bias/kintone-cdn@latest/dist/config.js"],
+    "css": [],
     "required_params": []
   }
 }

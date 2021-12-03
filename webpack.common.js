@@ -1,11 +1,11 @@
 const path = require('path');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
   entry: {
-    desktop: './src/customize.js',
-    config: './src/config.js',
+    desktop: './src/desktop/index.ts',
+    config: './src/config/index.ts',
   },
-
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', 'json'],
     alias: {
@@ -15,15 +15,15 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /.tsx?$/,
+        test: /\.tsx?$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'ts-loader',
-          options: {
-            transpileOnly: true,
-          },
+        loader: 'esbuild-loader',
+        options: {
+          loader: 'tsx',
+          target: 'es2015',
         },
       },
     ],
   },
+  plugins: [new ForkTsCheckerWebpackPlugin()],
 };

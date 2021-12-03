@@ -1,6 +1,10 @@
-import { LOCAL_STORAGE_KEY } from '@common/statics';
+import { LOCAL_STORAGE_KEY, PLUGIN_NAME } from '@common/statics';
 
-const getParsedLocalStorage = () => {
+type LocalStorage = Record<string, unknown> & {
+  pluginNames: string[];
+};
+
+const getParsedLocalStorage = (): Partial<LocalStorage> => {
   const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (!stored) {
     return {};
