@@ -20,7 +20,7 @@
     "lint": "eslint ./src --cache --ext .js,.ts,.tsx"
   },
   "devDependencies": {
-    "@emotion/css": "^11.5.0",
+    "@emotion/css": "11.5.0",
     "@emotion/styled": "11.6.0",
     "@kintone/dts-gen": "5.0.10",
     "@kintone/plugin-packer": "5.0.25",
@@ -52,6 +52,6 @@
     "webpack": "5.64.4",
     "webpack-cli": "4.9.1",
     "webpack-merge": "5.8.0",
-    "xlsx": "^0.17.4"
+    "xlsx": "0.17.4"
   }
 }
