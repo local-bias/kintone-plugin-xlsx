@@ -12,7 +12,7 @@
 
 詳細は以下で解説しています。
 
-[一覧情報をそのまま Excel(.xlsx)としてダウンロード](https://ribbit.work/blog/kintone-plugin-xlsx/)
+[一覧情報をそのまま Excel(.xlsx)としてダウンロード](https://ribbit.konomi.app/blog/kintone-plugin-xlsx/)
 
 標準では CSV でしか出力できない kintone ですが、xlsx 形式でファイル出力することができるボタンを一覧に追加するプラグインです。
 
