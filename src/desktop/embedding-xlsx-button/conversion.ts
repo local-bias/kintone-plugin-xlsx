@@ -1,4 +1,4 @@
-import xlsx, { Sheet, WorkBook } from 'xlsx';
+import { Sheet, utils, writeFile, Range } from 'xlsx';
 import { getAllRecords } from '@common/kintone-rest-api';
 import { getAppId, getQuery, getQueryCondition } from '@common/kintone';
 import { KintoneRestAPIClient } from '@kintone/rest-api-client';
@@ -48,8 +48,8 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
     client.app.getFormFields({ app: appId }),
   ]);
 
-  const merges: xlsx.Range[] = [];
-  const sheet = xlsx.utils.aoa_to_sheet([[]]);
+  const merges: Range[] = [];
+  const sheet = utils.aoa_to_sheet([[]]);
 
   // 情報を補完するため、アプリ情報・フィールド情報をそれぞれ取得します
   const fields = await getFields(
@@ -118,6 +118,7 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
     for (const field of fields) {
       const targetField = record[field.code];
       if (!targetField) {
+        col++;
         continue;
       }
 
@@ -152,16 +153,16 @@ export async function download(event: kintone.Event, config: kintone.plugin.Stor
     row += rowCount;
   }
 
-  sheet['!ref'] = xlsx.utils.encode_range({ s: { c: 0, r: 0 }, e: { c: maxCol, r: row } });
+  sheet['!ref'] = utils.encode_range({ s: { c: 0, r: 0 }, e: { c: maxCol, r: row } });
   sheet['!merges'] = merges;
 
-  const workbook = xlsx.utils.book_new();
-  xlsx.utils.book_append_sheet(workbook, sheet, 'app');
+  const workbook = utils.book_new();
+  utils.book_append_sheet(workbook, sheet, 'app');
 
   const date = new Date();
   const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
-  xlsx.writeFile(workbook, `${app.name}_${dateString}.xlsx`);
+  writeFile(workbook, `${app.name}_${dateString}.xlsx`);
 }
 
 /**
@@ -199,7 +200,7 @@ const getFields = async (
  *
  */
 function setCell(sheet: Sheet, row: number, col: number, value: string) {
-  const coordinate = xlsx.utils.encode_cell({ r: row, c: col });
+  const coordinate = utils.encode_cell({ r: row, c: col });
 
   sheet[coordinate] = { t: 's', v: value };
 }

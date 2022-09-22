@@ -1,10 +1,10 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import App from './app';
 
 const main = (pluginId: string): void => {
-  render(<App {...{ pluginId }} />, document.getElementById('settings'));
+  createRoot(document.getElementById('settings')!).render(<App {...{ pluginId }} />);
 };
 
 export default main;
