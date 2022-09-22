@@ -1,4 +1,4 @@
-import React, { VFC, VFCX } from 'react';
+import React, { FC, FCX } from 'react';
 import { useRecoilState } from 'recoil';
 import styled from '@emotion/styled';
 import produce from 'immer';
@@ -13,7 +13,7 @@ type Props = {
   setUnion: (checked: boolean) => void;
 };
 
-const Component: VFCX<Props> = ({ className, storage, setAllRecords, setAllFields, setUnion }) => (
+const Component: FCX<Props> = ({ className, storage, setAllRecords, setAllFields, setUnion }) => (
   <div {...{ className }}>
     <div>
       <h3>オプション</h3>
@@ -55,7 +55,7 @@ const StyledComponent = styled(Component)`
   }
 `;
 
-const Container: VFC = () => {
+const Container: FC = () => {
   const [storage, setStorage] = useRecoilState(storageState);
 
   const onSwitchChange = (checked: boolean, option: keyof kintone.plugin.Storage) => {
