@@ -1,15 +1,7 @@
-import {
-  Layout,
-  Properties as FieldProperties,
-  Record as KintoneRecord,
-} from '@kintone/rest-api-client/lib/client/types';
-import { KintoneRestAPIClient } from '@kintone/rest-api-client';
-import { getAppId } from './kintone';
-import { OneOf as FieldProperty } from '@kintone/rest-api-client/lib/KintoneFields/types/property';
-import { OneOf as Field } from '@kintone/rest-api-client/lib/KintoneFields/types/field';
+import { getFieldValueAsString, getFormFields, kintoneAPI } from '@konomi-app/kintone-utilities';
 
 /** kintoneアプリに初期状態で存在するフィールドタイプ */
-const DEFAULT_DEFINED_FIELDS: PickType<FieldProperty, 'type'>[] = [
+const DEFAULT_DEFINED_FIELDS: kintoneAPI.FieldPropertyType[] = [
   'RECORD_NUMBER',
   'UPDATED_TIME',
   'CREATOR',
@@ -19,30 +11,33 @@ const DEFAULT_DEFINED_FIELDS: PickType<FieldProperty, 'type'>[] = [
   'STATUS',
 ];
 
-export const getFieldProperties = async (targetApp?: string | number): Promise<FieldProperties> => {
+export const getFieldProperties = async (
+  targetApp?: string | number,
+  preview?: boolean
+): Promise<kintoneAPI.FieldProperties> => {
   const app = targetApp || kintone.app.getId();
 
   if (!app) {
     throw new Error('アプリのフィールド情報が取得できませんでした');
   }
 
-  const client = new KintoneRestAPIClient();
-
-  const { properties } = await client.app.getFormFields({ app });
+  const { properties } = await getFormFields({ app, preview });
 
   return properties;
 };
 
-export const getUserDefinedFields = async (): Promise<FieldProperties> => {
+export const getUserDefinedFields = async (options?: {
+  preview?: boolean;
+}): Promise<kintoneAPI.FieldProperties> => {
   const properties = await getFieldProperties();
   return omitFieldProperties(properties, DEFAULT_DEFINED_FIELDS);
 };
 
 /** サブテーブルをばらしてフィールドを返却します */
-export const getAllFields = async (): Promise<FieldProperty[]> => {
+export const getAllFields = async (): Promise<kintoneAPI.FieldProperty[]> => {
   const properties = await getFieldProperties();
 
-  const fields = Object.values(properties).reduce<FieldProperty[]>((acc, property) => {
+  const fields = Object.values(properties).reduce<kintoneAPI.FieldProperty[]>((acc, property) => {
     if (property.type === 'SUBTABLE') {
       return [...acc, ...Object.values(property.fields)];
     }
@@ -52,25 +47,44 @@ export const getAllFields = async (): Promise<FieldProperty[]> => {
   return fields;
 };
 
-export const getAppLayout = async (): Promise<Layout> => {
-  const app = getAppId();
-
-  if (!app) {
-    throw new Error('アプリのフィールド情報が取得できませんでした');
+/**
+ * アプリのレイアウト情報から、ラベルフィールドのみを返却します
+ * @param layout アプリのレイアウト情報
+ * @returns ラベルフィールド一覧
+ */
+export const getLabelFields = async (
+  layout: kintoneAPI.Layout
+): Promise<kintoneAPI.layout.Label[]> => {
+  const labels: kintoneAPI.layout.Label[] = [];
+  for (const section of layout) {
+    if (section.type === 'GROUP') {
+      for (const row of section.layout) {
+        labels.push(...getLabelFromLayoutFields(row.fields));
+      }
+    } else if (section.type === 'ROW') {
+      labels.push(...getLabelFromLayoutFields(section.fields));
+    }
   }
+  return labels;
+};
 
-  const client = new KintoneRestAPIClient();
-
-  const { layout } = await client.app.getFormLayout({ app });
-
-  return layout;
+export const getLabelFromLayoutFields = (
+  layout: kintoneAPI.LayoutField[]
+): kintoneAPI.layout.Label[] => {
+  const labels: kintoneAPI.layout.Label[] = [];
+  for (const field of layout) {
+    if (field.type === 'LABEL') {
+      labels.push(field);
+    }
+  }
+  return labels;
 };
 
 /** 指定のフィールドコードのフィールドを操作します */
 export const controlField = (
-  record: KintoneRecord,
+  record: kintoneAPI.RecordData,
   fieldCode: string,
-  callback: (field: Field) => void
+  callback: (field: kintoneAPI.Field) => void
 ): void => {
   if (record[fieldCode]) {
     callback(record[fieldCode]);
@@ -96,12 +110,12 @@ export const controlField = (
  * @returns 条件に当てはまるフィールド
  */
 export const filterFieldProperties = (
-  properties: FieldProperties,
-  callback: (field: FieldProperty) => boolean
-): FieldProperties => {
+  properties: kintoneAPI.FieldProperties,
+  callback: (field: kintoneAPI.FieldProperty) => boolean
+): kintoneAPI.FieldProperties => {
   const filtered = Object.entries(properties).filter(([_, value]) => callback(value));
 
-  const reduced = filtered.reduce<FieldProperties>(
+  const reduced = filtered.reduce<kintoneAPI.FieldProperties>(
     (acc, [key, value]) => ({ ...acc, [key]: value }),
     {}
   );
@@ -117,41 +131,17 @@ export const filterFieldProperties = (
  * @returns 指定したフィールドタイプを除いた一覧
  */
 export const omitFieldProperties = (
-  properties: FieldProperties,
-  omittingTypes: PickType<FieldProperties[string], 'type'>[]
-): FieldProperties => {
+  properties: kintoneAPI.FieldProperties,
+  omittingTypes: kintoneAPI.FieldPropertyType[]
+): kintoneAPI.FieldProperties => {
   return filterFieldProperties(properties, (property) => !omittingTypes.includes(property.type));
 };
 
 /** 対象レコードの各フィールドから、指定文字列に一致するフィールドが１つでもあればTrueを返します */
-export const someRecord = (record: KintoneRecord, searchValue: string): boolean => {
+export const someRecord = (record: kintoneAPI.RecordData, searchValue: string): boolean => {
   return Object.values(record).some((field) => someFieldValue(field, searchValue));
 };
 
-export const someFieldValue = (field: KintoneRecord[string], searchValue: string) => {
-  switch (field.type) {
-    case 'CREATOR':
-    case 'MODIFIER':
-      return ~field.value.name.indexOf(searchValue);
-
-    case 'CHECK_BOX':
-    case 'MULTI_SELECT':
-    case 'CATEGORY':
-      return field.value.some((value) => ~value.indexOf(searchValue));
-
-    case 'USER_SELECT':
-    case 'ORGANIZATION_SELECT':
-    case 'GROUP_SELECT':
-    case 'STATUS_ASSIGNEE':
-      return field.value.some(({ name }) => ~name.indexOf(searchValue));
-
-    case 'FILE':
-      return field.value.some(({ name }) => ~name.indexOf(searchValue));
-
-    case 'SUBTABLE':
-      return field.value.some(({ value }) => someRecord(value, searchValue));
-
-    default:
-      return field.value && ~field.value.indexOf(searchValue);
-  }
+export const someFieldValue = (field: kintoneAPI.RecordData[string], searchValue: string) => {
+  return ~getFieldValueAsString(field).indexOf(searchValue);
 };

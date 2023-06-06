@@ -1,6 +1,5 @@
 import { Sheet, utils, writeFile, Range } from 'xlsx';
-import { getAllRecords } from '@common/kintone-rest-api';
-import { getAppId, getQuery, getQueryCondition } from '@common/kintone';
+import { getAppId, getQuery, getQueryCondition } from '@lb-ribbit/kintone-xapp';
 import { KintoneRestAPIClient } from '@kintone/rest-api-client';
 import { Properties, ViewForResponse } from '@kintone/rest-api-client/lib/client/types';
 import {
@@ -13,6 +12,7 @@ import {
   OneOf as KintoneField,
   Subtable as SubtableField,
 } from '@kintone/rest-api-client/lib/KintoneFields/types/field';
+import { getAllRecords, kintoneAPI } from '@konomi-app/kintone-utilities';
 
 type ViewList = Record<string, ViewForResponse>;
 
@@ -24,7 +24,7 @@ type SubTableProperty = SubtableProperty<Record<string, InSubtableProperty>>;
  *
  * @param {Object} event kintoneイベント情報
  */
-export async function download(event: kintone.Event, config: kintone.plugin.Storage) {
+export async function download(event: kintoneAPI.js.Event, config: kintone.plugin.Storage) {
   const appId = getAppId();
 
   if (!appId) {
