@@ -109,17 +109,7 @@
     "@emotion/weak-memoize" "^0.3.1"
     stylis "4.2.0"
 
-"@emotion/css@^11.10.6":
-  version "11.11.0"
-  resolved "https://registry.yarnpkg.com/@emotion/css/-/css-11.11.0.tgz#dad6a27a77d5e5cbb0287674c3ace76d762563ca"
-  dependencies:
-    "@emotion/babel-plugin" "^11.11.0"
-    "@emotion/cache" "^11.11.0"
-    "@emotion/serialize" "^1.1.2"
-    "@emotion/sheet" "^1.2.2"
-    "@emotion/utils" "^1.2.1"
-
-"@emotion/css@^11.11.2":
+"@emotion/css@^11.10.8", "@emotion/css@^11.11.2":
   version "11.11.2"
   resolved "https://registry.yarnpkg.com/@emotion/css/-/css-11.11.2.tgz#e5fa081d0c6e335352e1bc2b05953b61832dca5a"
   integrity sha512-VJxe1ucoMYMS7DkiMdC2T7PWNbrEI0a39YRiyDvK2qq4lXwjRbVP/z4lpG+odCsRzadlR+1ywwrTzhdm5HNdew==
@@ -568,10 +558,11 @@
     react "^18.2.0"
 
 "@konomi-app/ui@^1.6.1":
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/@konomi-app/ui/-/ui-1.6.1.tgz#d645161fc11e3e8a2e3f1763eac8da12ddda9e4f"
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@konomi-app/ui/-/ui-1.7.0.tgz#7f1caa8070a92465f200e36eaa1466e0f52efdfe"
+  integrity sha512-w+uFZlnqVKkyQAZeA5i5bltgXdQ8Kz//dQUgEnO5cYgYDAKQTuVW8T+xFhOZqz8KO3YpSjj5WLJliIJrvsY+1g==
   dependencies:
-    "@emotion/css" "^11.10.6"
+    "@emotion/css" "^11.10.8"
 
 "@lb-ribbit/kintone-secrets@0.3.0":
   version "0.3.0"
