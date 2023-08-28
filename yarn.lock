@@ -41,10 +41,10 @@
     chalk "^2.4.2"
     js-tokens "^4.0.0"
 
-"@babel/runtime@^7.12.5", "@babel/runtime@^7.18.3":
-  version "7.22.10"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.22.10.tgz#ae3e9631fd947cb7e3610d3e9d8fef5f76696682"
-  integrity sha512-21t/fkKLMZI4pqP2wlmsQAWnYW1PDyKyyUV4vCi+B25ydmdaYTKXPwCj0BzSUnZf4seIiYvSA3jcZ3gdsMFkLQ==
+"@babel/runtime@^7.12.5", "@babel/runtime@^7.18.3", "@babel/runtime@^7.21.0", "@babel/runtime@^7.22.10":
+  version "7.22.11"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.22.11.tgz#7a9ba3bbe406ad6f9e8dd4da2ece453eb23a77a4"
+  integrity sha512-ee7jVNlWN09+KftVOu9n7S8gQzD/Z6hN/I8VBRXW4P1+Xe7kJGXMwu8vds4aGIMHZnNbdpSWCfZZtinytpcAvA==
   dependencies:
     regenerator-runtime "^0.14.0"
 
@@ -54,13 +54,6 @@
   dependencies:
     regenerator-runtime "^0.13.11"
 
-"@babel/runtime@^7.21.0", "@babel/runtime@^7.22.10":
-  version "7.22.11"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.22.11.tgz#7a9ba3bbe406ad6f9e8dd4da2ece453eb23a77a4"
-  integrity sha512-ee7jVNlWN09+KftVOu9n7S8gQzD/Z6hN/I8VBRXW4P1+Xe7kJGXMwu8vds4aGIMHZnNbdpSWCfZZtinytpcAvA==
-  dependencies:
-    regenerator-runtime "^0.14.0"
-
 "@babel/runtime@^7.22.5", "@babel/runtime@^7.22.6", "@babel/runtime@^7.5.5", "@babel/runtime@^7.8.7":
   version "7.22.6"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.22.6.tgz#57d64b9ae3cff1d67eb067ae117dac087f5bd438"
@@ -69,9 +62,9 @@
     regenerator-runtime "^0.13.11"
 
 "@babel/types@^7.22.5":
-  version "7.22.10"
-  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.22.10.tgz#4a9e76446048f2c66982d1a989dd12b8a2d2dc03"
-  integrity sha512-obaoigiLrlDZ7TUQln/8m4mSqIW2QFeOrCQc9r+xsaHGNoplVNYlRVpsfE8Vj35GEm2ZH4ZhrNYogs/3fj85kg==
+  version "7.22.11"
+  resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.22.11.tgz#0e65a6a1d4d9cbaa892b2213f6159485fe632ea2"
+  integrity sha512-siazHiGuZRz9aB9NpHy9GOs9xiQPKnMzgdr493iI1M67vRXpnEq8ZOOKzezC5q7zwuQ6sDhdSp4SD9ixKSqKZg==
   dependencies:
     "@babel/helper-string-parser" "^7.22.5"
     "@babel/helper-validator-identifier" "^7.22.5"
@@ -586,9 +579,9 @@
     webpack "^5.88.2"
 
 "@konomi-app/kintone-utilities@^2.4.0":
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/@konomi-app/kintone-utilities/-/kintone-utilities-2.13.0.tgz#1e7d5878b46d45cc0de6c1f8defc5aadc679c605"
-  integrity sha512-8/0QbIxynierrcbU9Jcu7uNplcE3GHxY4fHmknp1URdwsdfhoPYvx+reqXduVNcEZCFHeOwMnBaZIJxBHO0ZTQ==
+  version "2.15.1"
+  resolved "https://registry.yarnpkg.com/@konomi-app/kintone-utilities/-/kintone-utilities-2.15.1.tgz#72f83458ebe29e3fec8b24993dc9e0af92d7f205"
+  integrity sha512-1RsoKx2HB+DnsV/4zqY2yGiuTBhwhUEtbBskYfVK8ICyPr6erqVmL9+BhYL8JDIRQ5he1IURzB3DG+26JhiR5Q==
   dependencies:
     "@emotion/css" "^11.11.2"
     "@kintone/rest-api-client" "^4.1.0"
