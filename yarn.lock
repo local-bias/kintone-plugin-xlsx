@@ -573,10 +573,10 @@
     typescript "^5.1.6"
     webpack "^5.88.2"
 
-"@konomi-app/kintone-utilities@^2.4.0":
-  version "2.15.1"
-  resolved "https://registry.yarnpkg.com/@konomi-app/kintone-utilities/-/kintone-utilities-2.15.1.tgz#72f83458ebe29e3fec8b24993dc9e0af92d7f205"
-  integrity sha512-1RsoKx2HB+DnsV/4zqY2yGiuTBhwhUEtbBskYfVK8ICyPr6erqVmL9+BhYL8JDIRQ5he1IURzB3DG+26JhiR5Q==
+"@konomi-app/kintone-utilities@^3.0.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@konomi-app/kintone-utilities/-/kintone-utilities-3.1.0.tgz#9237ff7738f4116e93393e00ec3f1b56eb8b37de"
+  integrity sha512-AuDzaRqjqFaJvVgYQ3M0sOPQwteA48Rj0eM1lPUvv7OsOir+f8ioWY7BLy71Zu1Xtttiv82wUnbZfzm7UTrIqw==
   dependencies:
     "@emotion/css" "^11.11.2"
     "@kintone/rest-api-client" "^4.1.0"
