@@ -1,6 +1,5 @@
 const hp = 'https://konomi.app/';
-const commonCdn = 'https://cdn.jsdelivr.net/gh/local-bias/kintone-cdn@latest';
-const cdn = 'https://cdn.jsdelivr.net/gh/local-bias/kintone-plugin-xlsx@latest';
+const commonCdn = 'https://kintone-plugin.konomi.app/common';
 const localhost = 'https://127.0.0.1:28304';
 
 /** @type {import('./src/types/plugin-config').PluginConfig} */
@@ -8,7 +7,7 @@ export default {
   manifest: {
     base: {
       manifest_version: 1,
-      version: '1.0.5',
+      version: '1.1.0',
       type: 'APP',
       name: {
         en: 'kintone-plugin-webpack-example',
@@ -22,17 +21,11 @@ export default {
       },
       icon: 'icon.png',
       homepage_url: { ja: hp, en: hp },
-      desktop: {
-        js: [`${commonCdn}/dist/desktop.js`],
-        css: [],
-      },
-      mobile: {
-        js: [`${commonCdn}/dist/desktop.js`],
-        css: [],
-      },
+      desktop: { js: [`${commonCdn}/desktop.js`], css: [] },
+      mobile: { js: [`${commonCdn}/desktop.js`], css: [] },
       config: {
         html: 'config.html',
-        js: [`${commonCdn}/dist/config.js`],
+        js: [`${commonCdn}/config.js`],
         css: [],
         required_params: [],
       },
@@ -43,9 +36,9 @@ export default {
       config: { js: [`${localhost}/dist/dev/config/index.js`] },
     },
     prod: {
-      desktop: { js: [`${cdn}/cdn/desktop.js`] },
-      mobile: { js: [`${cdn}/cdn/desktop.js`] },
-      config: { js: [`${cdn}/cdn/config.js`] },
+      desktop: { js: ['desktop.js'] },
+      mobile: { js: ['desktop.js'] },
+      config: { js: ['config.js'] },
     },
     standalone: {
       desktop: { js: ['desktop.js'] },
