@@ -1,7 +1,7 @@
 const hp = 'https://konomi.app/';
 const commonCdn = 'https://cdn.jsdelivr.net/gh/local-bias/kintone-cdn@latest';
 const cdn = 'https://cdn.jsdelivr.net/gh/local-bias/kintone-plugin-xlsx@latest';
-const localhost = 'https://127.0.0.1:5500';
+const localhost = 'https://127.0.0.1:28304';
 
 /** @type {import('./src/types/plugin-config').PluginConfig} */
 export default {
