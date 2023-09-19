@@ -25,7 +25,12 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
 
   const query = (config.allRecords ? getQueryCondition() : getQuery()) || '';
 
-  const targetRecords = await getAllRecords({ app: appId, query });
+  const targetRecords = await getAllRecords({
+    app: appId,
+    query,
+    guestSpaceId: GUEST_SPACE_ID,
+    debug: process.env.NODE_ENV === 'development',
+  });
 
   // レコードが存在しない場合は処理しません
   if (!targetRecords.length) {
