@@ -1,23 +1,15 @@
 import { Sheet, utils, writeFile, Range } from 'xlsx';
 import { getAppId, getQuery, getQueryCondition } from '@lb-ribbit/kintone-xapp';
-import { KintoneRestAPIClient } from '@kintone/rest-api-client';
-import { Properties, ViewForResponse } from '@kintone/rest-api-client/lib/client/types';
 import {
-  OneOf as FieldProperty,
-  Subtable as SubtableProperty,
-  InSubtable as InSubtableProperty,
-} from '@kintone/rest-api-client/lib/KintoneFields/types/property';
-import {
-  InSubtable as InSubtableField,
-  OneOf as KintoneField,
-  Subtable as SubtableField,
-} from '@kintone/rest-api-client/lib/KintoneFields/types/field';
-import { getAllRecords, kintoneAPI } from '@konomi-app/kintone-utilities';
+  getAllRecords,
+  getApp,
+  getFormFields,
+  getViews,
+  kintoneAPI,
+} from '@konomi-app/kintone-utilities';
+import { GUEST_SPACE_ID } from '@/common/global';
 
-type ViewList = Record<string, ViewForResponse>;
-
-type SubTable = SubtableField<Record<string, InSubtableField>>;
-type SubTableProperty = SubtableProperty<Record<string, InSubtableProperty>>;
+type ViewList = Record<string, kintoneAPI.view.Response>;
 
 /**
  * 受け取ったkintoneレコードを変換し、XLSX形式でダウンロードします
@@ -40,12 +32,22 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
     return;
   }
 
-  const client = new KintoneRestAPIClient();
-
   const [app, { views }, { properties }] = await Promise.all([
-    client.app.getApp({ id: appId }),
-    client.app.getViews({ app: appId }),
-    client.app.getFormFields({ app: appId }),
+    getApp({
+      id: appId,
+      guestSpaceId: GUEST_SPACE_ID,
+      debug: process.env.NODE_ENV === 'development',
+    }),
+    getViews({
+      app: appId,
+      guestSpaceId: GUEST_SPACE_ID,
+      debug: process.env.NODE_ENV === 'development',
+    }),
+    getFormFields({
+      app: appId,
+      guestSpaceId: GUEST_SPACE_ID,
+      debug: process.env.NODE_ENV === 'development',
+    }),
   ]);
 
   const merges: Range[] = [];
@@ -64,7 +66,7 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
   // Excelファイルを作成します
   let row = 0;
   let col = 0;
-  const tableFields: SubTableProperty[] = [];
+  const tableFields: kintoneAPI.property.Subtable[] = [];
 
   for (const field of fields) {
     // セルの値を設定します
@@ -72,7 +74,7 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
 
     // サブテーブルの場合
     if (field.type === 'SUBTABLE') {
-      tableFields.push(field as SubTableProperty);
+      tableFields.push(field as kintoneAPI.property.Subtable);
 
       Object.keys(field.fields).map((key, j) => {
         setCell(sheet, row + 1, col + j, field.fields[key].label);
@@ -106,7 +108,7 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
     // レコードが使用する行数を算出します
     let rowCount = 1;
     tableFields.map((tf) => {
-      const subtable = record[tf.code] as SubTable;
+      const subtable = record[tf.code] as kintoneAPI.field.Subtable;
 
       const len = subtable.value.length;
       if (rowCount < len) {
@@ -123,7 +125,7 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
       }
 
       if (targetField.type === 'SUBTABLE') {
-        const subValue = targetField as any as SubTable;
+        const subValue = targetField as any as kintoneAPI.field.Subtable;
 
         subValue.value.map((tableRow, j) => {
           Object.keys((field as any).fields).map((key, k) => {
@@ -170,12 +172,12 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
  *
  * @param {Object} sample フィールドを取得するためのサンプルレコード
  */
-const getFields = async (
+const getFields = (
   views: ViewList,
-  properties: Properties,
+  properties: kintoneAPI.FieldProperties,
   viewId: string,
   displaysAll: boolean
-) => {
+): kintoneAPI.FieldProperty[] => {
   if (displaysAll) {
     return Object.values(properties);
   }
@@ -205,7 +207,7 @@ function setCell(sheet: Sheet, row: number, col: number, value: string) {
   sheet[coordinate] = { t: 's', v: value };
 }
 
-const getFieldValue = (field: KintoneField) => {
+const getFieldValue = (field: kintoneAPI.Field) => {
   switch (field.type) {
     case 'CREATOR':
     case 'MODIFIER':
