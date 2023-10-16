@@ -25,7 +25,7 @@
     "@konomi-app/kbuild": "^3.0.0",
     "@konomi-app/kintone-utilities": "^3.3.0",
     "@konomi-app/kintone-utility-component": "^1.2.1",
-    "@konomi-app/ui": "^1.7.0",
+    "@konomi-app/ui": "^2.0.0",
     "@konomi-app/ui-react": "^1.1.1",
     "@lb-ribbit/kintone-secrets": "0.3.0",
     "@lb-ribbit/kintone-xapp": "0.4.0",
