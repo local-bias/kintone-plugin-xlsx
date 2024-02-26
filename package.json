@@ -32,7 +32,7 @@
     "@mui/icons-material": "5.15.10",
     "@mui/material": "5.15.10",
     "@types/luxon": "3.4.2",
-    "@types/react": "18.2.56",
+    "@types/react": "18.2.58",
     "@types/react-dom": "18.2.19",
     "@typescript-eslint/eslint-plugin": "7.0.1",
     "@typescript-eslint/parser": "7.0.1",
