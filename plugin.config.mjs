@@ -1,49 +1,62 @@
-const hp = 'https://konomi.app/';
-const commonCdn = 'https://kintone-plugin.konomi.app/common';
+//@ts-check
+const hp = 'https://konomi.app';
+const cdn = 'https://kintone-plugin.konomi.app';
+const key = 'xlsx';
 const localhost = 'https://127.0.0.1:28304';
 
-/** @type {import('./src/types/plugin-config').PluginConfig} */
+/** @type { import('@konomi-app/kintone-utilities').PluginConfig } */
 export default {
+  id: `ribbit-kintone-plugin-${key}`,
+  pluginReleasePageUrl: `https://ribbit.konomi.app/kintone-plugin/`,
   manifest: {
     base: {
       manifest_version: 1,
-      version: '1.1.0',
+      version: '1.0.0',
       type: 'APP',
       name: {
-        en: 'kintone-plugin-webpack-example',
+        en: 'Excel Export Plugin',
         ja: 'Excel出力プラグイン',
-        zh: '插件模板',
+        zh: 'Excel导出插件',
       },
       description: {
-        en: 'This plugin enable to export displayed infomations to XLSX format.',
+        en: 'By adding this plugin to your app, you can export the information from a list in xlsx format.',
         ja: 'アプリに追加することで、一覧の情報をそのままxlsx形式で出力できます。',
-        zh: '插件模板',
+        zh: '将此插件添加到您的应用程序中，您可以将列表中的信息导出为xlsx格式。',
       },
       icon: 'icon.png',
       homepage_url: { ja: hp, en: hp },
-      desktop: { js: [`${commonCdn}/desktop.js`], css: [] },
-      mobile: { js: [`${commonCdn}/desktop.js`], css: [] },
+      desktop: { js: [`${cdn}/common/desktop.js`], css: [] },
+      mobile: { js: [`${cdn}/common/desktop.js`], css: [] },
       config: {
         html: 'config.html',
-        js: [`${commonCdn}/config.js`],
+        js: [`${cdn}/common/config.js`],
         css: [],
         required_params: [],
       },
     },
     dev: {
-      desktop: { js: [`${localhost}/dist/dev/desktop/index.js`] },
-      mobile: { js: [`${localhost}/dist/dev/desktop/index.js`] },
-      config: { js: [`${localhost}/dist/dev/config/index.js`] },
+      desktop: {
+        js: [`${localhost}/dist/dev/desktop.js`],
+        css: [`${localhost}/dist/dev/desktop.css`],
+      },
+      mobile: {
+        js: [`${localhost}/dist/dev/desktop.js`],
+        css: [`${localhost}/dist/dev/desktop.css`],
+      },
+      config: {
+        js: [`${localhost}/dist/dev/config.js`],
+        css: [`${localhost}/dist/dev/config.css`],
+      },
     },
     prod: {
-      desktop: { js: ['desktop.js'] },
-      mobile: { js: ['desktop.js'] },
-      config: { js: ['config.js'] },
+      desktop: { js: [`${cdn}/${key}/desktop.js`], css: [`${cdn}/${key}/desktop.css`] },
+      mobile: { js: [`${cdn}/${key}/desktop.js`], css: [`${cdn}/${key}/desktop.css`] },
+      config: { js: [`${cdn}/${key}/config.js`], css: [`${cdn}/${key}/config.css`] },
     },
     standalone: {
-      desktop: { js: ['desktop.js'] },
-      mobile: { js: ['desktop.js'] },
-      config: { js: ['config.js'] },
+      desktop: { js: ['desktop.js'], css: ['desktop.css'] },
+      mobile: { js: ['desktop.js'], css: ['desktop.css'] },
+      config: { js: ['config.js'], css: ['config.css'] },
     },
   },
 };
