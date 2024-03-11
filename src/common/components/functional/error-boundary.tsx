@@ -1,10 +1,10 @@
-import React, { FC, FCX } from 'react';
+import React, { FC } from 'react';
 import { Alert, AlertTitle, Button } from '@mui/material';
 import { URL_INQUIRY } from '@/common/static';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
-const Component: FCX<FallbackProps> = ({ className, error, resetErrorBoundary }) => (
-  <div {...{ className }}>
+const Component: FC<FallbackProps> = ({ error, resetErrorBoundary }) => (
+  <div>
     <Alert severity='error'>
       <AlertTitle title={error.message}>エラーが発生しました</AlertTitle>
       <p>予期しないエラーが発生しました</p>
