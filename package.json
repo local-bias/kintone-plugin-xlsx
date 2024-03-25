@@ -47,7 +47,7 @@
     "react-error-boundary": "4.0.13",
     "react-feather": "^2.0.10",
     "recoil": "0.7.7",
-    "typescript": "5.4.2",
+    "typescript": "5.4.3",
     "xlsx": "^0.18.5"
   },
   "prettier": {
