@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@emotion/react": "11.11.4",
-    "@emotion/styled": "11.11.0",
+    "@emotion/styled": "11.11.5",
     "@kintone/dts-gen": "8.0.8",
     "@kintone/plugin-packer": "8.0.4",
     "@kintone/plugin-uploader": "9.0.3",
