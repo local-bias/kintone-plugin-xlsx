@@ -16,7 +16,9 @@ const Component: FC = () => (
           <Suspense fallback={<LoaderWithLabel label='設定情報を取得しています' />}>
             <PluginLayout singleCondition>
               <PluginContent>
-                <Form />
+                <PluginErrorBoundary>
+                  <Form />
+                </PluginErrorBoundary>
               </PluginContent>
               <PluginBanner url={URL_BANNER} />
               <Footer />
