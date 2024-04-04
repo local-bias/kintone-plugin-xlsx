@@ -1,7 +1,6 @@
-import { restoreStorage } from '@konomi-app/kintone-utilities';
+import { restoreStorage, getHeaderSpace } from '@konomi-app/kintone-utilities';
 import { getButton } from './button-creation';
 import { download } from './conversion';
-import { getHeaderSpace } from '@lb-ribbit/kintone-xapp';
 import { createConfig } from '@/common/plugin';
 import { listener } from '@/common/listener';
 import { PLUGIN_ID } from '@/common/global';

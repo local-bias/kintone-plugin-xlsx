@@ -5,7 +5,7 @@ import { PluginErrorBoundary } from '@/common/components/functional/error-bounda
 import { URL_BANNER, URL_PROMOTION } from '@/common/static';
 import Footer from './components/model/footer';
 import Form from './components/model/form';
-import { PluginBanner, PluginContent, PluginLayout } from '@konomi-app/kintone-utility-component';
+import { PluginBanner, PluginContent, PluginLayout } from '@konomi-app/kintone-utilities-react';
 import { LoaderWithLabel } from '@konomi-app/ui-react';
 
 const Component: FC = () => (
