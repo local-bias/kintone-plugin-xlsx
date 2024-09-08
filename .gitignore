@@ -107,5 +107,8 @@ dist
 *.ppk
 dist/
 plugin/**/*.js
+plugin/**/*.css
 plugin/manifest.json
-bk/**/*
+plugin/config.html
+.plugin
+.accelerant
