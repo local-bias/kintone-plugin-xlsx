@@ -2,12 +2,24 @@
 const hp = 'https://konomi.app';
 const cdn = 'https://kintone-plugin.konomi.app';
 const key = 'xlsx';
-const localhost = 'https://127.0.0.1:28304';
 
-/** @type { import('@konomi-app/kintone-utilities').PluginConfig } */
-export default {
+/** @satisfies { Plugin.Meta.Config } */
+export default /** @type { const } */ ({
   id: `ribbit-kintone-plugin-${key}`,
   pluginReleasePageUrl: `https://ribbit.konomi.app/kintone-plugin/`,
+  server: {
+    port: 28304,
+  },
+  lint: {
+    build: true,
+  },
+  tailwind: {
+    css: 'src/styles/global.css',
+    config: {
+      desktop: 'tailwind.config.desktop.mjs',
+      config: 'tailwind.config.config.mjs',
+    },
+  },
   manifest: {
     base: {
       manifest_version: 1,
@@ -34,20 +46,6 @@ export default {
         required_params: [],
       },
     },
-    dev: {
-      desktop: {
-        js: [`${localhost}/dist/dev/desktop.js`],
-        css: [`${localhost}/dist/dev/desktop.css`],
-      },
-      mobile: {
-        js: [`${localhost}/dist/dev/desktop.js`],
-        css: [`${localhost}/dist/dev/desktop.css`],
-      },
-      config: {
-        js: [`${localhost}/dist/dev/config.js`],
-        css: [`${localhost}/dist/dev/config.css`],
-      },
-    },
     prod: {
       desktop: { js: [`${cdn}/${key}/desktop.js`], css: [`${cdn}/${key}/desktop.css`] },
       mobile: { js: [`${cdn}/${key}/desktop.js`], css: [`${cdn}/${key}/desktop.css`] },
@@ -59,4 +57,4 @@ export default {
       config: { js: ['config.js'], css: ['config.css'] },
     },
   },
-};
+});
