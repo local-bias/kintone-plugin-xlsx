@@ -29,7 +29,7 @@ export const getFieldProperties = async (
 export const getUserDefinedFields = async (options?: {
   preview?: boolean;
 }): Promise<kintoneAPI.FieldProperties> => {
-  const properties = await getFieldProperties();
+  const properties = await getFieldProperties(kintone.app.getId()!, options?.preview);
   return omitFieldProperties(properties, DEFAULT_DEFINED_FIELDS);
 };
 
