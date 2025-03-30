@@ -14,8 +14,3 @@ export const loadingState = atom<boolean>({
   key: `${PREFIX}loadingState`,
   default: false,
 });
-
-export const tabIndexState = atom<number>({
-  key: `${PREFIX}tabIndexState`,
-  default: 0,
-});
