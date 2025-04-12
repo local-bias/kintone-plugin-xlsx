@@ -59,6 +59,8 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
     Boolean(config.allFields)
   );
 
+  process.env.NODE_ENV === 'development' && console.log({ fields, views });
+
   const includesSubtable = fields.some((field) => field.type === 'SUBTABLE');
 
   // Excelファイルを作成します
@@ -181,13 +183,17 @@ const getFields = (
   }
 
   // レコードを全て表示しない場合は現在の一覧情報を取得し、表示しているフィールドを取得します
-  const found = Object.values(views).find((view) => viewId === view.id);
+  const foundView = Object.values(views).find((view) => viewId === view.id);
 
-  if (!found || found.type !== 'LIST') {
+  if (!foundView || foundView.type !== 'LIST') {
     return Object.values(properties);
   }
 
-  return Object.values(properties).filter((property) => found.fields.includes(property.code));
+  return foundView.fields
+    .map<kintoneAPI.FieldProperty | undefined>((field) =>
+      Object.values(properties).find((property) => property.code === field)
+    )
+    .filter(Boolean) as kintoneAPI.FieldProperty[];
 };
 
 /**
