@@ -13,13 +13,6 @@ export default /** @type { const } */ ({
   lint: {
     build: true,
   },
-  tailwind: {
-    css: 'src/styles/global.css',
-    config: {
-      desktop: 'tailwind.config.desktop.mjs',
-      config: 'tailwind.config.config.mjs',
-    },
-  },
   manifest: {
     base: {
       manifest_version: 1,
