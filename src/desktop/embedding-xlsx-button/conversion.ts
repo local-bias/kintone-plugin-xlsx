@@ -1,15 +1,18 @@
 import { GUEST_SPACE_ID } from '@/common/global';
+import { store } from '@/lib/store';
 import {
   getAllRecords,
-  getApp,
   getAppId,
-  getFormFields,
   getQuery,
   getQueryCondition,
-  getViews,
   kintoneAPI,
 } from '@konomi-app/kintone-utilities';
 import { Range, Sheet, utils, writeFile } from 'xlsx';
+import {
+  currentAppFormFieldsAtom,
+  currentAppPropertyAtom,
+  currentAppViewsAtom,
+} from '../states/kintone';
 
 type ViewList = Record<string, kintoneAPI.view.Response>;
 
@@ -40,21 +43,9 @@ export async function download(event: kintoneAPI.js.Event, config: kintone.plugi
   }
 
   const [app, { views }, { properties }] = await Promise.all([
-    getApp({
-      id: appId,
-      guestSpaceId: GUEST_SPACE_ID,
-      debug: process.env.NODE_ENV === 'development',
-    }),
-    getViews({
-      app: appId,
-      guestSpaceId: GUEST_SPACE_ID,
-      debug: process.env.NODE_ENV === 'development',
-    }),
-    getFormFields({
-      app: appId,
-      guestSpaceId: GUEST_SPACE_ID,
-      debug: process.env.NODE_ENV === 'development',
-    }),
+    store.get(currentAppPropertyAtom),
+    store.get(currentAppViewsAtom),
+    store.get(currentAppFormFieldsAtom),
   ]);
 
   const merges: Range[] = [];
