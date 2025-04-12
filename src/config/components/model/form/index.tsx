@@ -1,36 +1,26 @@
-import React, { FCX } from 'react';
+import { pluginConfigAtom } from '@/config/states/plugin';
 import styled from '@emotion/styled';
-
 import { FormControlLabel, Switch } from '@mui/material';
-import { useRecoilCallback, useRecoilValue } from 'recoil';
-import { storageState } from '@/config/states/plugin';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
+import React, { FC } from 'react';
 
-const Component: FCX = ({ className }) => {
-  const storage = useRecoilValue(storageState);
+const handleAllRecordsChangeAtom = atom(null, (_, set, checked: boolean) => {
+  set(pluginConfigAtom, (prev) => ({ ...prev, allRecords: checked }));
+});
 
-  const setAllRecords = useRecoilCallback(
-    ({ set }) =>
-      (checked: boolean) => {
-        set(storageState, (prev) => ({ ...prev, allRecords: checked }));
-      },
-    []
-  );
+const handleAllFieldsChangeAtom = atom(null, (_, set, checked: boolean) => {
+  set(pluginConfigAtom, (prev) => ({ ...prev, allFields: checked }));
+});
 
-  const setAllFields = useRecoilCallback(
-    ({ set }) =>
-      (checked: boolean) => {
-        set(storageState, (prev) => ({ ...prev, allFields: checked }));
-      },
-    []
-  );
+const handleUnionChangeAtom = atom(null, (_, set, checked: boolean) => {
+  set(pluginConfigAtom, (prev) => ({ ...prev, union: checked }));
+});
 
-  const setUnion = useRecoilCallback(
-    ({ set }) =>
-      (checked: boolean) => {
-        set(storageState, (prev) => ({ ...prev, union: checked }));
-      },
-    []
-  );
+const Component: FC<{ className?: string }> = ({ className }) => {
+  const storage = useAtomValue(pluginConfigAtom);
+  const setAllRecords = useSetAtom(handleAllRecordsChangeAtom);
+  const setAllFields = useSetAtom(handleAllFieldsChangeAtom);
+  const setUnion = useSetAtom(handleUnionChangeAtom);
 
   return (
     <div {...{ className }}>
