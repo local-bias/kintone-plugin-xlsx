@@ -5,4 +5,7 @@ export const createConfig = (): kintone.plugin.Storage => ({
   allFields: false,
   allRecords: true,
   union: true,
+  fileNameTemplate: '{appName}_{date}',
+  sheetName: '{appName}',
+  dateAsExcel: true,
 });

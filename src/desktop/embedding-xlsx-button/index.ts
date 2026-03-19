@@ -1,6 +1,7 @@
-import { restoreStorage, getHeaderSpace } from '@konomi-app/kintone-utilities';
+import { restorePluginConfig, getHeaderSpace } from '@konomi-app/kintone-utilities';
 import { getButton } from './button-creation';
 import { download } from './conversion';
+import { showToast } from './notification';
 import { createConfig } from '@/common/plugin';
 import { listener } from '@/common/listener';
 import { PLUGIN_ID } from '@/common/global';
@@ -13,7 +14,7 @@ listener.add(['app.record.index.show'], async (event) => {
     return event;
   }
 
-  const storage = restoreStorage(PLUGIN_ID) ?? createConfig();
+  const storage = restorePluginConfig(PLUGIN_ID) ?? createConfig();
 
   const button = getButton(BUTTON_ID);
   const headerMenuSpace = getHeaderSpace(event.type);
@@ -26,8 +27,10 @@ listener.add(['app.record.index.show'], async (event) => {
     button.disabled = true;
     try {
       await download(event, storage);
+      showToast('Excelファイルをダウンロードしました', 'success');
     } catch (error) {
       console.error(error);
+      showToast('ダウンロードに失敗しました', 'error');
     } finally {
       button.disabled = false;
     }
